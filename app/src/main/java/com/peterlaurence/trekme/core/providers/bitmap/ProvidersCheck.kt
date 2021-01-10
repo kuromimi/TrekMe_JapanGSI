@@ -35,3 +35,8 @@ fun checkOrdnanceSurveyProvider(tileStreamProvider: TileStreamProvider): Boolean
     val bitmapProvider = BitmapProvider(tileStreamProvider)
     return bitmapProvider.getBitmap(40, 61, 7) != null
 }
+
+fun checkJapanGSISurveyProvider(tileStreamProvider: TileStreamProvider): Boolean {
+    val bitmapProvider = BitmapProvider(tileStreamProvider)
+    return bitmapProvider.getBitmap(1, 1, 1) != null
+}

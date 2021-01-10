@@ -78,6 +78,13 @@ class MapSourceAdapter(private val wmtsSourceSet: Array<WmtsSource>, private val
                 holder.image.setImageDrawable(parentView.resources.getDrawable(R.drawable.ordnance_survey_logo, null))
                 holder.ignLegalMention.visibility = View.GONE
             }
+            WmtsSource.JAPAN_GSI -> {
+                holder.title.text = parentView.resources.getText(R.string.japan_gsi_source)
+                holder.description.text = parentView.resources.getText(
+                        R.string.japan_gsi_source_description)
+                holder.image.setImageDrawable(parentView.resources.getDrawable(R.drawable.japan_gsi, null))
+                holder.ignLegalMention.visibility = View.GONE
+            }
         }
 
         /* Take the selection into account to set colors */

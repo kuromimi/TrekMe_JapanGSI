@@ -101,6 +101,14 @@ class GoogleMapWmtsViewModel @ViewModelInject constructor(
                     BoundariesConfig(listOf(
                             BoundingBox(49.8, 61.08, -8.32, 2.04)
                     ))
+            ),
+            WmtsSource.JAPAN_GSI to listOf(
+                    ScaleLimitsConfig(maxScale = 0.25f),
+                    ScaleForZoomOnPositionConfig(scale = 0.125f),
+                    LevelLimitsConfig(levelMax = 18),
+                    BoundariesConfig(listOf(
+                            BoundingBox(23.00, 46.00, 122.00, 148.00)
+                    ))
             )
     )
 
@@ -208,6 +216,7 @@ class GoogleMapWmtsViewModel @ViewModelInject constructor(
                 WmtsSource.OPEN_STREET_MAP -> checkOSMProvider(tileStreamProvider)
                 WmtsSource.SWISS_TOPO -> checkSwissTopoProvider(tileStreamProvider)
                 WmtsSource.ORDNANCE_SURVEY -> checkOrdnanceSurveyProvider(tileStreamProvider)
+                WmtsSource.JAPAN_GSI -> checkOrdnanceSurveyProvider(tileStreamProvider)
             }
         }
     }

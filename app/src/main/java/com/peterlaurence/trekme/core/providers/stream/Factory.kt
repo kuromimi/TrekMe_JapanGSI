@@ -39,5 +39,9 @@ fun createTileStreamProvider(wmtsSource: WmtsSource, mapSourceData: MapSourceDat
             val urlTileBuilder = UrlTileBuilderOrdnanceSurvey(ordnanceSurveyData.api)
             TileStreamProviderOrdnanceSurvey(urlTileBuilder)
         }
+        WmtsSource.JAPAN_GSI -> {
+            val urlTileBuilder = UrlTileBuilderJapan()
+            TileStreamProviderJapan(urlTileBuilder)
+        }
     }
 }
