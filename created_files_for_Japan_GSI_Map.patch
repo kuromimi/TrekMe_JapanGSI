@@ -1,0 +1,339 @@
+Index: app/src/main/java/com/peterlaurence/trekme/core/mapsource/WmtsSource.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/peterlaurence/trekme/core/mapsource/WmtsSource.kt	(revision 4bb61ef4e3828baa2adaf68fabdde1bcfff64dda)
++++ app/src/main/java/com/peterlaurence/trekme/core/mapsource/WmtsSource.kt	(revision b125e5f9225fbe80b23620efc02d763f71104e95)
+@@ -6,7 +6,7 @@
+ 
+ 
+ enum class WmtsSource {
+-    IGN, SWISS_TOPO, OPEN_STREET_MAP, USGS, IGN_SPAIN, ORDNANCE_SURVEY
++    IGN, SWISS_TOPO, OPEN_STREET_MAP, USGS, IGN_SPAIN, ORDNANCE_SURVEY, JAPAN_GSI
+ }
+ 
+ @Parcelize
+Index: app/src/main/java/com/peterlaurence/trekme/core/providers/bitmap/ProvidersCheck.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/peterlaurence/trekme/core/providers/bitmap/ProvidersCheck.kt	(revision 4bb61ef4e3828baa2adaf68fabdde1bcfff64dda)
++++ app/src/main/java/com/peterlaurence/trekme/core/providers/bitmap/ProvidersCheck.kt	(revision b125e5f9225fbe80b23620efc02d763f71104e95)
+@@ -34,4 +34,9 @@
+ fun checkOrdnanceSurveyProvider(tileStreamProvider: TileStreamProvider): Boolean {
+     val bitmapProvider = BitmapProvider(tileStreamProvider)
+     return bitmapProvider.getBitmap(40, 61, 7) != null
+-}
+\ No newline at end of file
++}
++
++fun checkJapanGSISurveyProvider(tileStreamProvider: TileStreamProvider): Boolean {
++    val bitmapProvider = BitmapProvider(tileStreamProvider)
++    return bitmapProvider.getBitmap(1, 1, 1) != null
++}
+Index: app/src/main/java/com/peterlaurence/trekme/core/providers/stream/Factory.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/peterlaurence/trekme/core/providers/stream/Factory.kt	(revision 4bb61ef4e3828baa2adaf68fabdde1bcfff64dda)
++++ app/src/main/java/com/peterlaurence/trekme/core/providers/stream/Factory.kt	(revision b125e5f9225fbe80b23620efc02d763f71104e95)
+@@ -39,5 +39,9 @@
+             val urlTileBuilder = UrlTileBuilderOrdnanceSurvey(ordnanceSurveyData.api)
+             TileStreamProviderOrdnanceSurvey(urlTileBuilder)
+         }
++        WmtsSource.JAPAN_GSI -> {
++            val urlTileBuilder = UrlTileBuilderJapan()
++            TileStreamProviderJapan(urlTileBuilder)
++        }
+     }
+ }
+Index: app/src/main/java/com/peterlaurence/trekme/core/providers/stream/TileStreamProviderJapan.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/peterlaurence/trekme/core/providers/stream/TileStreamProviderJapan.kt	(revision b125e5f9225fbe80b23620efc02d763f71104e95)
++++ app/src/main/java/com/peterlaurence/trekme/core/providers/stream/TileStreamProviderJapan.kt	(revision b125e5f9225fbe80b23620efc02d763f71104e95)
+@@ -0,0 +1,24 @@
++package com.peterlaurence.trekme.core.providers.stream
++
++import com.peterlaurence.trekme.core.map.OutOfBounds
++import com.peterlaurence.trekme.core.map.TileResult
++import com.peterlaurence.trekme.core.map.TileStreamProvider
++import com.peterlaurence.trekme.core.providers.bitmap.TileStreamProviderHttp
++import com.peterlaurence.trekme.core.providers.bitmap.TileStreamProviderRetry
++import com.peterlaurence.trekme.core.providers.urltilebuilder.UrlTileBuilder
++
++/**
++ * A specific [TileStreamProvider] for Japan GSI Map.
++ *
++ * @author Kuromimi on 1/10/2021
++ */
++class TileStreamProviderJapan(urlTileBuilder: UrlTileBuilder) : TileStreamProvider {
++    private val base = TileStreamProviderRetry(TileStreamProviderHttp(urlTileBuilder))
++
++    override fun getTileStream(row: Int, col: Int, zoomLvl: Int): TileResult {
++        /* Safeguard */
++        if (zoomLvl > 18) return OutOfBounds
++
++        return base.getTileStream(row, col, zoomLvl)
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/peterlaurence/trekme/core/providers/urltilebuilder/UrlTileBuilderJapan.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/peterlaurence/trekme/core/providers/urltilebuilder/UrlTileBuilderJapan.kt	(revision b125e5f9225fbe80b23620efc02d763f71104e95)
++++ app/src/main/java/com/peterlaurence/trekme/core/providers/urltilebuilder/UrlTileBuilderJapan.kt	(revision b125e5f9225fbe80b23620efc02d763f71104e95)
+@@ -0,0 +1,7 @@
++package com.peterlaurence.trekme.core.providers.urltilebuilder
++
++class UrlTileBuilderJapan : UrlTileBuilder {
++    override fun build(level: Int, row: Int, col: Int): String {
++        return "http://cyberjapandata.gsi.go.jp/xyz/std/$level/$col/$row.png"
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/peterlaurence/trekme/ui/mapcreate/MapSourceAdapter.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/peterlaurence/trekme/ui/mapcreate/MapSourceAdapter.kt	(revision 4bb61ef4e3828baa2adaf68fabdde1bcfff64dda)
++++ app/src/main/java/com/peterlaurence/trekme/ui/mapcreate/MapSourceAdapter.kt	(revision b125e5f9225fbe80b23620efc02d763f71104e95)
+@@ -78,6 +78,13 @@
+                 holder.image.setImageDrawable(parentView.resources.getDrawable(R.drawable.ordnance_survey_logo, null))
+                 holder.ignLegalMention.visibility = View.GONE
+             }
++            WmtsSource.JAPAN_GSI -> {
++                holder.title.text = parentView.resources.getText(R.string.japan_gsi_source)
++                holder.description.text = parentView.resources.getText(
++                        R.string.japan_gsi_source_description)
++                holder.image.setImageDrawable(parentView.resources.getDrawable(R.drawable.japan_gsi, null))
++                holder.ignLegalMention.visibility = View.GONE
++            }
+         }
+ 
+         /* Take the selection into account to set colors */
+Index: app/src/main/java/com/peterlaurence/trekme/viewmodel/mapcreate/GoogleMapWmtsViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/peterlaurence/trekme/viewmodel/mapcreate/GoogleMapWmtsViewModel.kt	(revision 4bb61ef4e3828baa2adaf68fabdde1bcfff64dda)
++++ app/src/main/java/com/peterlaurence/trekme/viewmodel/mapcreate/GoogleMapWmtsViewModel.kt	(revision b125e5f9225fbe80b23620efc02d763f71104e95)
+@@ -101,6 +101,14 @@
+                     BoundariesConfig(listOf(
+                             BoundingBox(49.8, 61.08, -8.32, 2.04)
+                     ))
++            ),
++            WmtsSource.JAPAN_GSI to listOf(
++                    ScaleLimitsConfig(maxScale = 0.25f),
++                    ScaleForZoomOnPositionConfig(scale = 0.125f),
++                    LevelLimitsConfig(levelMax = 18),
++                    BoundariesConfig(listOf(
++                            BoundingBox(23.00, 46.00, 122.00, 148.00)
++                    ))
+             )
+     )
+ 
+@@ -208,6 +216,7 @@
+                 WmtsSource.OPEN_STREET_MAP -> checkOSMProvider(tileStreamProvider)
+                 WmtsSource.SWISS_TOPO -> checkSwissTopoProvider(tileStreamProvider)
+                 WmtsSource.ORDNANCE_SURVEY -> checkOrdnanceSurveyProvider(tileStreamProvider)
++                WmtsSource.JAPAN_GSI -> checkOrdnanceSurveyProvider(tileStreamProvider)
+             }
+         }
+     }
+Index: app/src/main/res/values/strings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values/strings.xml	(revision 4bb61ef4e3828baa2adaf68fabdde1bcfff64dda)
++++ app/src/main/res/values/strings.xml	(revision b125e5f9225fbe80b23620efc02d763f71104e95)
+@@ -247,6 +247,8 @@
+     <string name="ordnance_survey_source" translatable="false">Ordnance Survey</string>
+     <string name="ordnance_survey_source_description">U.K maps</string>
+     <string name="place_outside_of_covered_area">The place is outside of the area covered by this map.</string>
++    <string name="japan_gsi_source" translatable="false">Japan GSI Map</string>
++    <string name="japan_gsi_source_description" translatable="false">Japan GSI Map</string>
+ 
+     <!-- MapCreateFragment -->
+     <string name="mapcreate_define_area">Choose area</string>
+diff --git app/src/main/res/drawable/japan_gsi.png app/src/main/res/drawable/japan_gsi.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..7b481cbdf6d95fc168185817158184bcee634783
+GIT binary patch
+literal 8559
+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
+EAMFUC!T<mO
+
